@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CAASPP Growth by Starting Band</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400&display=swap">
+<style>
+:root{
+ --color-bg:#f7f8fa; --color-panel:#ffffff; --color-fg:#1b1f27; --color-fg-muted:#5b6372; --color-border-line:#e1e4ea; --color-bad:#c4352b;
+ --cds-chart-grid:#eceef2; --cds-chart-axis:#9aa1ad; --cds-chart-muted:#c3c8d1; --cds-chart-reference:#4a5161;
+ --cds-surface-popover:#ffffff; --cds-border:#d5d9e0; --cds-shadow-popover:0 4px 16px rgba(20,25,35,.12); --cds-text-secondary:#5b6372;
+ --c-low:#2563c9; --c-top:#d4721c;
+ --font-anthropic-sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+ --font-anthropic-serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+ --cds-font-size-caption:.8125rem; --cds-font-size-body:.9375rem; --cds-font-size-heading:1.0625rem; --cds-font-size-title:2rem; --cds-font-weight-medium:600;
+ --cds-gap-xs:.25rem; --cds-gap-sm:.5rem; --cds-gap-md:1rem; --cds-gap-xl:2rem; --cds-pad-xs:.25rem; --cds-pad-sm:.5rem; --cds-pad-lg:1.25rem;
+ --cds-radius:10px; --cds-dur-slow:300ms;
+}
+@media (prefers-color-scheme: dark){:root{
+ --color-bg:#12151b; --color-panel:#1a1e26; --color-fg:#e8ebf0; --color-fg-muted:#9aa2b1; --color-border-line:#2b313c; --color-bad:#ef6a5f;
+ --cds-chart-grid:#252a33; --cds-chart-axis:#5d6574; --cds-chart-muted:#4a515e; --cds-chart-reference:#c9ced8;
+ --cds-surface-popover:#222732; --cds-border:#363d4a; --cds-shadow-popover:0 4px 16px rgba(0,0,0,.45); --cds-text-secondary:#9aa2b1;
+ --c-low:#5b93f0; --c-top:#f0954a; color-scheme:dark;}}
+html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:var(--font-anthropic-sans);}
+.page{padding:2rem 16px 3rem;}
+.cg-foot{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);max-width:72rem;margin:2rem auto 0;line-height:1.5;}
+.cg-foot a{color:inherit;}
+.dash-skeleton{}
+
+.cg { display: grid; gap: var(--cds-gap-xl); font-family: var(--font-anthropic-sans); color: var(--color-fg); position: relative; max-width: 72rem; margin-inline: auto; }
+.cg-head { display: grid; gap: var(--cds-gap-sm); }
+.cg-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; text-wrap: balance; }
+.cg-lede { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-body); max-width: 65ch; line-height: 1.5; }
+.cg-tiles { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); }
+.cg-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-sm); align-content: start; min-width: 0; }
+.cg-tile-num { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.cg-tile-num small { font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-body); color: var(--color-fg-muted); }
+.cg-tile-label { font-size: var(--cds-font-size-body); line-height: 1.4; }
+.cg-tile-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.4; }
+.cg-h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+.cg-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: 0; line-height: 1.5; max-width: 75ch; }
+.cg-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); align-items: center; }
+.cg-legend span { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); }
+.cg-sw { width: 0.75rem; height: 0.75rem; border-radius: 3px; display: inline-block; }
+.cg-dash { width: 1.25rem; height: 0; border-top: 2px dashed var(--cds-chart-reference); display: inline-block; }
+.cg-subj { font-size: var(--cds-font-size-body); font-weight: var(--cds-font-weight-medium); margin: var(--cds-gap-sm) 0 0; }
+.cg-multi { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr)); }
+.cg-panel { min-width: 0; }
+.cg-panel-t { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-bottom: 2px; font-variant-numeric: tabular-nums; }
+.cg-chart { min-height: 160px; position: relative; }
+.cg-chart svg { display: block; overflow: visible; }
+.cg-chart text { fill: var(--color-fg-muted); font-size: 11px; font-family: var(--font-anthropic-sans); font-variant-numeric: tabular-nums; }
+.cg-chart .cg-val { fill: var(--color-fg); }
+.cg-chart .cg-axis-t { font-size: 12px; }
+.cg-two { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); }
+.cg-why { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+.cg-why h3 { font-size: var(--cds-font-size-body); font-weight: var(--cds-font-weight-medium); margin: 0; }
+.cg-why p { margin: 0; font-size: var(--cds-font-size-body); line-height: 1.5; color: var(--color-fg); }
+.cg-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); z-index: 5; max-width: 15rem; line-height: 1.45; font-variant-numeric: tabular-nums; }
+.cg-tip .cg-tip-h { color: var(--cds-text-secondary); }
+.cg-controls { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: center; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.cg-controls select { font: inherit; color: var(--color-fg); background: var(--color-bg); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-sm); }
+.cg-tablebox { max-height: 28rem; overflow: auto; }
+.cg-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+.cg-table th { position: sticky; top: 0; background: var(--color-panel); text-align: right; font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+.cg-table td { text-align: right; padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+.cg-table th:nth-child(-n+3), .cg-table td:nth-child(-n+3) { text-align: left; }
+.cg-pos { display: inline-block; font-size: 10px; padding: 0 6px; border-radius: 999px; margin-left: 6px; color: var(--color-fg); }
+.cg-steps { margin: 0; padding-left: 1.25rem; display: grid; gap: var(--cds-gap-xs); font-size: var(--cds-font-size-body); line-height: 1.5; max-width: 70ch; }
+[data-dash-source-state=empty] { color: transparent; }
+[data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+.cg-fail { display: flex; align-items: center; justify-content: center; gap: var(--cds-gap-xs); min-height: 140px; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.cg-fail::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); }
+</style></head>
+<body><div class="page">
+
+<div class="cg" id="cg">
+  <header class="cg-head" id="overview">
+    <h1 class="cg-title">CAASPP growth by starting band, 2024–25</h1>
+    <p class="cg-lede">Statewide matched students, grades 3–8. Each band groups students by their 2023–24 scale score, then shows how much their score changed in 2024–25. Lower bands gain the most; top bands gain the least. Most of that pattern is built into how the data is grouped, so compare a school's band to the same state band, not to other bands.</p>
+  </header>
+
+  <div class="cg-tiles" id="tiles">
+    <div class="cg-card">
+      <div class="cg-tile-num"><span data-source="summary" data-field="low_max" data-row="0" class="dash-skeleton">—</span> <small>of <span data-source="summary" data-field="pairs" data-row="0">—</span> grade pairs</small></div>
+      <div class="cg-tile-label">Lowest band had the largest median gain</div>
+      <div class="cg-tile-note">ELA and math, grades 3→4 through 7→8</div>
+    </div>
+    <div class="cg-card">
+      <div class="cg-tile-num"><span data-source="summary" data-field="top_min" data-row="0" class="dash-skeleton">—</span> <small>of <span data-source="summary" data-field="pairs" data-row="0">—</span> grade pairs</small></div>
+      <div class="cg-tile-label">Top band had the smallest median gain (ties count)</div>
+      <div class="cg-tile-note">The exception is Math 7→8, where the curve turns into a U</div>
+    </div>
+    <div class="cg-card">
+      <div class="cg-tile-num"><span data-source="summary" data-field="ela_top_neg" data-row="0" class="dash-skeleton">—</span> <small>of <span data-source="summary" data-field="ela_pairs" data-row="0">—</span> ELA pairs</small></div>
+      <div class="cg-tile-label">ELA top band went backward (median change below zero)</div>
+      <div class="cg-tile-note">Drops grow with grade, ending at <span data-source="summary" data-field="ela_worst_top" data-row="0">—</span> points in 7→8</div>
+    </div>
+  </div>
+
+  <section class="cg-card" id="by-band">
+    <h2 class="cg-h2">Median change by 2023–24 starting band</h2>
+    <p class="cg-note">Each small chart is one grade pair. Bars run left to right from the lowest starting band to the highest. All charts share one scale, in scale-score points. Hover a bar for its band, mean and count.</p>
+    <div class="cg-legend" aria-hidden="true">
+      <span><i class="cg-sw" id="sw-low"></i>Lowest band</span>
+      <span><i class="cg-sw" id="sw-mid"></i>Middle bands</span>
+      <span><i class="cg-sw" id="sw-top"></i>Top band</span>
+      <span><i class="cg-dash"></i>Median for all students in that grade pair</span>
+    </div>
+    <div id="chart-bands" data-source="bands derived"></div>
+  </section>
+
+  <div class="cg-two">
+    <section class="cg-card" id="gap">
+      <h2 class="cg-h2">How far the end bands sit from typical growth</h2>
+      <p class="cg-note">Each band's median change minus the median change for all students in the grade pair. Zero means the band grew like everyone else.</p>
+      <div class="cg-legend" aria-hidden="true">
+        <span><i class="cg-sw" id="sw-low2"></i>Lowest band</span>
+        <span><i class="cg-sw" id="sw-top2"></i>Top band</span>
+      </div>
+      <div class="cg-chart" id="chart-gap" data-source="derived"></div>
+    </section>
+    <section class="cg-card" id="counts">
+      <h2 class="cg-h2">Smaller bands, bigger swings</h2>
+      <p class="cg-note">Every band in every grade pair. The bands holding few students are the end bands, and they sit farthest from typical growth. The count isn't the cause: both come from being far from the center of the scale.</p>
+      <div class="cg-legend" aria-hidden="true">
+        <span><i class="cg-sw" id="sw-low3"></i>Lowest band</span>
+        <span><i class="cg-sw" id="sw-mid3"></i>Middle bands</span>
+        <span><i class="cg-sw" id="sw-top3"></i>Top band</span>
+      </div>
+      <div class="cg-chart" id="chart-count" data-source="derived"></div>
+    </section>
+  </div>
+
+  <section id="why" class="cg-head">
+    <h2 class="cg-h2">Why the pattern shows up even without real differences</h2>
+    <div class="cg-why">
+      <div class="cg-card"><h3>Regression to the mean</h3><p>A score is part skill and part luck on test day. Students placed in the top band are more likely to have had a lucky day, and most don't repeat it, so the group drifts down. The lowest band drifts up for the same reason.</p></div>
+      <div class="cg-card"><h3>Less precise at the extremes</h3><p>The adaptive test has fewer items aimed at very high or very low ability, so individual scores at the ends carry more error. More error means a bigger drift back toward the middle the next year.</p></div>
+      <div class="cg-card"><h3>Floors and ceilings</h3><p>The top band ends at the highest reportable score, so those students have little room up and lots of room down. The lowest band starts at the floor and can only climb.</p></div>
+      <div class="cg-card"><h3>What count does and doesn't do</h3><p>Statewide, even the smallest band has thousands of students, so its median is stable. At a school, a band with a dozen students can swing by many points from a few noisy scores. Treat small local bands with care.</p></div>
+    </div>
+  </section>
+
+  <section class="cg-card" id="benchmark">
+    <h2 class="cg-h2">State benchmark by band</h2>
+    <p class="cg-note">Use these as the yardstick for a school or district: take the local band's median change and subtract the state median for the same band. A positive difference means local students in that band grew more than similar students statewide. Mean minus median below zero means a tail of large drops; above zero, a tail of large gains.</p>
+    <div class="cg-controls">
+      <label for="cg-pick">Show</label>
+      <select id="cg-pick" aria-label="Grade pair"></select>
+    </div>
+    <div class="cg-tablebox">
+      <table class="cg-table" id="tbl" data-source="derived" data-row-key="subject,grades,band">
+        <thead><tr>
+          <th data-field="subject">Subject</th>
+          <th data-field="grades">Grades</th>
+          <th data-field="band">2023–24 band</th>
+          <th data-field="median">Median change</th>
+          <th data-field="mean">Mean change</th>
+          <th data-field="count">Students</th>
+          <th data-field="share">Share of grade</th>
+          <th data-field="vs_overall">Vs. all students</th>
+          <th data-field="skew">Mean − median</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="cg-card" id="sites">
+    <h2 class="cg-h2">Comparing sites</h2>
+    <p class="cg-note">Site results are not loaded yet. Once they are, this section will show each site's band growth next to the state benchmark above. For each site, grade pair and subject it needs:</p>
+    <ol class="cg-steps">
+      <li>Students grouped into the same 2023–24 scale score bands used here.</li>
+      <li>The median (and ideally mean) change in scale score for each band.</li>
+      <li>The number of matched students in each band, so small groups can be flagged.</li>
+    </ol>
+  </section>
+
+  <div class="cg-tip" id="cg-tip" hidden></div>
+</div>
+
+<p class="cg-foot">Source: California Department of Education, CAASPP 2024–25 Change in Scale Score by 2023–24 Scale Score Range (October 2025). Statewide matched students, grades 3–8.</p></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+(() => {
+  const DATA = { bands: [{"subject": "ELA", "grades": "3→4", "band": "2115-2199", "median": 155, "mean": 154.91, "count": 6809, "is_total": false}, {"subject": "ELA", "grades": "3→4", "band": "2200-2299", "median": 77, "mean": 76.04, "count": 52573, "is_total": false}, {"subject": "ELA", "grades": "3→4", "band": "2300-2399", "median": 56, "mean": 54.24, "count": 118815, "is_total": false}, {"subject": "ELA", "grades": "3→4", "band": "2400-2499", "median": 45, "mean": 44.73, "count": 132631, "is_total": false}, {"subject": "ELA", "grades": "3→4", "band": "2500-2599", "median": 30, "mean": 29.86, "count": 67179, "is_total": false}, {"subject": "ELA", "grades": "3→4", "band": "2600-2650", "median": 4, "mean": -1.34, "count": 12536, "is_total": false}, {"subject": "ELA", "grades": "3→4", "band": "Total", "median": 49, "mean": 49.72, "count": 390543, "is_total": true}, {"subject": "ELA", "grades": "4→5", "band": "2140-2199", "median": 173, "mean": 173.59, "count": 3800, "is_total": false}, {"subject": "ELA", "grades": "4→5", "band": "2200-2299", "median": 91, "mean": 90.8, "count": 29337, "is_total": false}, {"subject": "ELA", "grades": "4→5", "band": "2300-2399", "median": 58, "mean": 56.02, "count": 94757, "is_total": false}, {"subject": "ELA", "grades": "4→5", "band": "2400-2499", "median": 46, "mean": 45, "count": 133550, "is_total": false}, {"subject": "ELA", "grades": "4→5", "band": "2500-2599", "median": 34, "mean": 34.44, "count": 103878, "is_total": false}, {"subject": "ELA", "grades": "4→5", "band": "2600-2690", "median": 10, "mean": 6.87, "count": 35380, "is_total": false}, {"subject": "ELA", "grades": "4→5", "band": "Total", "median": 46, "mean": 46.07, "count": 400702, "is_total": true}, {"subject": "ELA", "grades": "5→6", "band": "2200-2299", "median": 107, "mean": 107.4, "count": 18040, "is_total": false}, {"subject": "ELA", "grades": "5→6", "band": "2300-2399", "median": 56, "mean": 54.37, "count": 68494, "is_total": false}, {"subject": "ELA", "grades": "5→6", "band": "2400-2499", "median": 39, "mean": 37.59, "count": 121569, "is_total": false}, {"subject": "ELA", "grades": "5→6", "band": "2500-2599", "median": 25, "mean": 23.63, "count": 123077, "is_total": false}, {"subject": "ELA", "grades": "5→6", "band": "2600-2730", "median": -3, "mean": -3.12, "count": 69729, "is_total": false}, {"subject": "ELA", "grades": "5→6", "band": "Total", "median": 32, "mean": 32.23, "count": 400909, "is_total": true}, {"subject": "ELA", "grades": "6→7", "band": "2230-2299", "median": 99, "mean": 102.96, "count": 8165, "is_total": false}, {"subject": "ELA", "grades": "6→7", "band": "2300-2399", "median": 44, "mean": 44.09, "count": 52051, "is_total": false}, {"subject": "ELA", "grades": "6→7", "band": "2400-2499", "median": 38, "mean": 33.43, "count": 113902, "is_total": false}, {"subject": "ELA", "grades": "6→7", "band": "2500-2599", "median": 30, "mean": 27.63, "count": 134553, "is_total": false}, {"subject": "ELA", "grades": "6→7", "band": "2600-2699", "median": 18, "mean": 17.63, "count": 80106, "is_total": false}, {"subject": "ELA", "grades": "6→7", "band": "2700-2770", "median": -11, "mean": -11.4, "count": 14432, "is_total": false}, {"subject": "ELA", "grades": "6→7", "band": "Total", "median": 31, "mean": 29.54, "count": 403209, "is_total": true}, {"subject": "ELA", "grades": "7→8", "band": "2260-2399", "median": 63, "mean": 63.65, "count": 53940, "is_total": false}, {"subject": "ELA", "grades": "7→8", "band": "2400-2499", "median": 30, "mean": 27.03, "count": 93445, "is_total": false}, {"subject": "ELA", "grades": "7→8", "band": "2500-2599", "median": 17, "mean": 14.71, "count": 130319, "is_total": false}, {"subject": "ELA", "grades": "7→8", "band": "2600-2699", "median": 9, "mean": 7.76, "count": 100673, "is_total": false}, {"subject": "ELA", "grades": "7→8", "band": "2700-2810", "median": -16, "mean": -16.03, "count": 29688, "is_total": false}, {"subject": "ELA", "grades": "7→8", "band": "Total", "median": 20, "mean": 20.05, "count": 408065, "is_total": true}, {"subject": "Math", "grades": "3→4", "band": "2190-2299", "median": 75, "mean": 74.6, "count": 38018, "is_total": false}, {"subject": "Math", "grades": "3→4", "band": "2300-2399", "median": 47, "mean": 46.89, "count": 117017, "is_total": false}, {"subject": "Math", "grades": "3→4", "band": "2400-2499", "median": 39, "mean": 38.75, "count": 155912, "is_total": false}, {"subject": "Math", "grades": "3→4", "band": "2500-2599", "median": 31, "mean": 31.58, "count": 72235, "is_total": false}, {"subject": "Math", "grades": "3→4", "band": "2600-2660", "median": 11, "mean": 6.49, "count": 11388, "is_total": false}, {"subject": "Math", "grades": "3→4", "band": "Total", "median": 42, "mean": 42.38, "count": 394570, "is_total": true}, {"subject": "Math", "grades": "4→5", "band": "2205-2299", "median": 69, "mean": 69.27, "count": 18235, "is_total": false}, {"subject": "Math", "grades": "4→5", "band": "2300-2399", "median": 30, "mean": 28.82, "count": 88904, "is_total": false}, {"subject": "Math", "grades": "4→5", "band": "2400-2499", "median": 24, "mean": 22.85, "count": 152894, "is_total": false}, {"subject": "Math", "grades": "4→5", "band": "2500-2599", "median": 26, "mean": 24.4, "count": 113518, "is_total": false}, {"subject": "Math", "grades": "4→5", "band": "2600-2700", "median": 15, "mean": 14.04, "count": 30827, "is_total": false}, {"subject": "Math", "grades": "4→5", "band": "Total", "median": 26, "mean": 26.02, "count": 404378, "is_total": true}, {"subject": "Math", "grades": "5→6", "band": "2220-2299", "median": 63, "mean": 67.24, "count": 16182, "is_total": false}, {"subject": "Math", "grades": "5→6", "band": "2300-2399", "median": 26, "mean": 26.52, "count": 73253, "is_total": false}, {"subject": "Math", "grades": "5→6", "band": "2400-2499", "median": 23, "mean": 21.36, "count": 135340, "is_total": false}, {"subject": "Math", "grades": "5→6", "band": "2500-2599", "median": 24, "mean": 21.8, "count": 120881, "is_total": false}, {"subject": "Math", "grades": "5→6", "band": "2600-2740", "median": 22, "mean": 20.31, "count": 58345, "is_total": false}, {"subject": "Math", "grades": "5→6", "band": "Total", "median": 25, "mean": 24.11, "count": 404001, "is_total": true}, {"subject": "Math", "grades": "6→7", "band": "2235-2299", "median": 82, "mean": 85.44, "count": 19794, "is_total": false}, {"subject": "Math", "grades": "6→7", "band": "2300-2399", "median": 33, "mean": 33.48, "count": 63709, "is_total": false}, {"subject": "Math", "grades": "6→7", "band": "2400-2499", "median": 18, "mean": 16.57, "count": 114059, "is_total": false}, {"subject": "Math", "grades": "6→7", "band": "2500-2599", "median": 13, "mean": 11.98, "count": 122313, "is_total": false}, {"subject": "Math", "grades": "6→7", "band": "2600-2699", "median": 18, "mean": 17.69, "count": 67473, "is_total": false}, {"subject": "Math", "grades": "6→7", "band": "2700-2780", "median": 13, "mean": 7.86, "count": 18266, "is_total": false}, {"subject": "Math", "grades": "6→7", "band": "Total", "median": 21, "mean": 21, "count": 405614, "is_total": true}, {"subject": "Math", "grades": "7→8", "band": "2250-2299", "median": 85, "mean": 93.82, "count": 15894, "is_total": false}, {"subject": "Math", "grades": "7→8", "band": "2300-2399", "median": 30, "mean": 33.39, "count": 61363, "is_total": false}, {"subject": "Math", "grades": "7→8", "band": "2400-2499", "median": 13, "mean": 11.9, "count": 110585, "is_total": false}, {"subject": "Math", "grades": "7→8", "band": "2500-2599", "median": 8, "mean": 6.03, "count": 118000, "is_total": false}, {"subject": "Math", "grades": "7→8", "band": "2600-2699", "median": 21, "mean": 20.64, "count": 74373, "is_total": false}, {"subject": "Math", "grades": "7→8", "band": "2700-2820", "median": 28, "mean": 22.65, "count": 29388, "is_total": false}, {"subject": "Math", "grades": "7→8", "band": "Total", "median": 19, "mean": 18.97, "count": 409603, "is_total": true}] };
+  const calcs = {}, cache = {}, cbs = [];
+  let params = {};
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const run = () => { for (const k in cache) delete cache[k]; cbs.forEach((f) => f()); };
+  window.dash = {
+    get colors() { return [css('--c-low'), css('--c-top')]; },
+    calc(id, o) { calcs[id] = o; },
+    data(id) {
+      if (DATA[id]) return { status: 'ok', data: DATA[id] };
+      if (!calcs[id]) return { status: 'missing', data: [] };
+      if (!cache[id]) cache[id] = { status: 'ok', data: calcs[id].fn(...calcs[id].inputs.map((i) => window.dash.data(i).data)) };
+      return cache[id];
+    },
+    onData(f) { cbs.push(f); f(); },
+    params() { return params; },
+    setParams(o) { params = { ...params, ...o }; run(); },
+  };
+  let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(run, 150); });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => location.reload());
+})();
+</script>
+<script>
+(() => {
+  const ORDER = ['3→4', '4→5', '5→6', '6→7', '7→8'];
+  const num = (x) => Number(x);
+
+  dash.calc('derived', {
+    inputs: ['bands'],
+    title: 'Band growth vs. all students',
+    description: 'Adds each band\'s position, share of the grade pair\'s students, its median change minus the all-students median, and mean minus median.',
+    fn: (bands) => {
+      const totals = {};
+      bands.filter((r) => String(r.is_total) === 'true').forEach((r) => { totals[r.subject + '|' + r.grades] = r; });
+      const rows = bands.filter((r) => String(r.is_total) !== 'true');
+      const counts = {};
+      rows.forEach((r) => { const k = r.subject + '|' + r.grades; counts[k] = (counts[k] || 0) + 1; });
+      const seen = {};
+      return rows.map((r) => {
+        const k = r.subject + '|' + r.grades;
+        const i = seen[k] = (seen[k] ?? -1) + 1;
+        const t = totals[k];
+        return {
+          subject: r.subject, grades: r.grades, band: r.band,
+          position: i === 0 ? 'lowest' : i === counts[k] - 1 ? 'top' : 'middle',
+          median: Number(r.median), mean: Number(r.mean), count: Number(r.count),
+          share: Number(r.count) / Number(t.count),
+          vs_overall: Number(r.median) - Number(t.median),
+          skew: Math.round((Number(r.mean) - Number(r.median)) * 100) / 100,
+        };
+      });
+    },
+  });
+
+  dash.calc('summary', {
+    inputs: ['derived'],
+    title: 'Pattern counts across grade pairs',
+    description: 'For each grade pair, whether the lowest band had the largest median gain and the top band the smallest; plus ELA top-band results.',
+    fn: (derived) => {
+      const groups = {};
+      derived.forEach((r) => { (groups[r.subject + '|' + r.grades] ||= []).push(r); });
+      const gs = Object.values(groups);
+      const low = (g) => g.find((r) => r.position === 'lowest');
+      const top = (g) => g.find((r) => r.position === 'top');
+      const max = (g) => Math.max(...g.map((r) => r.median));
+      const min = (g) => Math.min(...g.map((r) => r.median));
+      const ela = gs.filter((g) => g[0].subject === 'ELA');
+      return [{
+        pairs: gs.length,
+        low_max: gs.filter((g) => low(g).median === max(g)).length,
+        top_min: gs.filter((g) => top(g).median === min(g)).length,
+        ela_pairs: ela.length,
+        ela_top_neg: ela.filter((g) => top(g).median < 0).length,
+        ela_worst_top: Math.min(...ela.map((g) => top(g).median)),
+      }];
+    },
+  });
+
+  const root = document.getElementById('cg');
+  const tip = document.getElementById('cg-tip');
+  const fmtS = d3.format('+,.0f');
+  const fmtC = d3.format(',');
+  const fmtP = d3.format('.1%');
+  const fmtM = d3.format('+.1f');
+  const C = () => ({ low: dash.colors[0], top: dash.colors[1], mid: 'var(--cds-chart-muted)' });
+  const colorOf = (p) => C()[p === 'lowest' ? 'low' : p === 'top' ? 'top' : 'mid'];
+
+  const showTip = (event, lines) => {
+    const box = root.getBoundingClientRect();
+    tip.replaceChildren();
+    lines.forEach((l, i) => { const d = document.createElement('div'); if (i === 0) d.className = 'cg-tip-h'; d.textContent = l; tip.appendChild(d); });
+    tip.hidden = false;
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    let x = event.clientX - box.left + 12, y = event.clientY - box.top - th - 10;
+    if (x + tw > box.width) x = event.clientX - box.left - tw - 12;
+    if (x < 0) x = 0;
+    if (y < 0) y = event.clientY - box.top + 14;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  };
+  const hideTip = () => { tip.hidden = true; };
+  const textW = (svg, s, cls) => { const t = svg.append('text').attr('class', cls || null).text(s); const w = t.node().getComputedTextLength(); t.remove(); return w; };
+  const bandTip = (r) => [`${r.subject} ${r.grades} · band ${r.band}`, `Median change ${fmtS(r.median)}`, `Mean change ${fmtS(r.mean)}`, `Students ${fmtC(r.count)} (${fmtP(r.share)} of grade)`, `Vs. all students ${fmtS(r.vs_overall)}`];
+  const fail = (el) => { el.replaceChildren(); const d = document.createElement('div'); d.className = 'cg-fail'; d.textContent = 'Failed to load'; el.appendChild(d); };
+
+  ['sw-low', 'sw-low2', 'sw-low3'].forEach((id) => { document.getElementById(id).style.background = dash.colors[0]; });
+  ['sw-top', 'sw-top2', 'sw-top3'].forEach((id) => { document.getElementById(id).style.background = dash.colors[1]; });
+  ['sw-mid', 'sw-mid3'].forEach((id) => { document.getElementById(id).style.background = 'var(--cds-chart-muted)'; });
+
+  function drawBands(el, rows, totals) {
+    el.replaceChildren();
+    const yMin = Math.min(-20, d3.min(rows, (r) => r.median));
+    const yMax = d3.max(rows, (r) => r.median);
+    ['ELA', 'Math'].forEach((subj) => {
+      const h = document.createElement('div'); h.className = 'cg-subj'; h.textContent = subj === 'ELA' ? 'English language arts' : 'Mathematics'; el.appendChild(h);
+      const grid = document.createElement('div'); grid.className = 'cg-multi'; el.appendChild(grid);
+      ORDER.forEach((g) => {
+        const data = rows.filter((r) => r.subject === subj && r.grades === g);
+        if (!data.length) return;
+        const panel = document.createElement('div'); panel.className = 'cg-panel'; grid.appendChild(panel);
+        const t = document.createElement('div'); t.className = 'cg-panel-t'; t.textContent = `Grades ${g}`; panel.appendChild(t);
+        const box = document.createElement('div'); box.className = 'cg-chart'; panel.appendChild(box);
+        const W = Math.max(120, box.clientWidth), H = 160;
+        const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', `${subj} grades ${g} median change by band`);
+        const ticks = [0, 50, 100, 150].filter((v) => v <= yMax + 10);
+        const ml = Math.ceil(d3.max(ticks, (v) => textW(svg, String(v)))) + 6;
+        const m = { t: 14, r: 4, b: 16, l: ml };
+        const y = d3.scaleLinear([yMin - 8, yMax + 14], [H - m.b, m.t]);
+        const x = d3.scaleBand(data.map((d) => d.band), [m.l, W - m.r]).padding(0.2);
+        svg.append('g').selectAll('line').data(ticks).join('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', (v) => y(v)).attr('y2', (v) => y(v)).attr('stroke', (v) => v === 0 ? 'var(--cds-chart-axis)' : 'var(--cds-chart-grid)').attr('stroke-width', 1);
+        svg.append('g').selectAll('text').data(ticks).join('text').attr('x', m.l - 6).attr('y', (v) => y(v)).attr('dy', '0.32em').attr('text-anchor', 'end').text((v) => v);
+        svg.append('g').selectAll('rect').data(data).join('rect')
+          .attr('x', (d) => x(d.band)).attr('width', x.bandwidth())
+          .attr('y', (d) => Math.min(y(d.median), y(0))).attr('height', (d) => Math.max(1, Math.abs(y(d.median) - y(0))))
+          .attr('rx', Math.min(4, x.bandwidth() / 2)).style('fill', (d) => colorOf(d.position));
+        const tot = totals[subj + '|' + g];
+        if (tot != null) svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(tot)).attr('y2', y(tot)).attr('stroke', 'var(--cds-chart-reference)').attr('stroke-width', 1.5).attr('stroke-dasharray', '4 3');
+        svg.append('g').selectAll('text').data(data.filter((d) => d.position !== 'middle')).join('text').attr('class', 'cg-val')
+          .attr('x', (d) => x(d.band) + x.bandwidth() / 2).attr('y', (d) => d.median >= 0 ? y(d.median) - 4 : y(d.median) + 11)
+          .attr('text-anchor', 'middle').text((d) => fmtS(d.median));
+        svg.append('g').selectAll('rect').data(data).join('rect')
+          .attr('x', (d) => x(d.band) - x.step() * x.paddingInner() / 2).attr('width', x.step()).attr('y', m.t).attr('height', H - m.t - m.b)
+          .attr('fill', 'transparent').style('cursor', 'default')
+          .on('mousemove', (e, d) => showTip(e, bandTip(d))).on('mouseleave', hideTip);
+      });
+    });
+  }
+
+  function drawGap(el, rows) {
+    el.replaceChildren();
+    const groups = [];
+    ['ELA', 'Math'].forEach((s) => ORDER.forEach((g) => {
+      const d = rows.filter((r) => r.subject === s && r.grades === g);
+      if (d.length) groups.push({ label: `${s} ${g}`, low: d.find((r) => r.position === 'lowest'), top: d.find((r) => r.position === 'top') });
+    }));
+    const W = Math.max(280, el.clientWidth), rowH = 30, H = groups.length * rowH + 44;
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Lowest and top band gap from all-students median');
+    const ml = Math.ceil(d3.max(groups, (g) => textW(svg, g.label))) + 10;
+    const m = { t: 8, r: 34, b: 36, l: ml };
+    const ext = d3.extent(groups.flatMap((g) => [g.low.vs_overall, g.top.vs_overall]));
+    const x = d3.scaleLinear([Math.min(-40, ext[0] - 5), ext[1] + 5], [m.l, W - m.r]).nice();
+    const y = d3.scaleBand(groups.map((g) => g.label), [m.t, H - m.b]).padding(0.3);
+    const xt = x.ticks(Math.max(3, Math.floor((W - m.l) / 70)));
+    svg.append('g').selectAll('line').data(xt).join('line').attr('x1', (v) => x(v)).attr('x2', (v) => x(v)).attr('y1', m.t).attr('y2', H - m.b).attr('stroke', (v) => v === 0 ? 'var(--cds-chart-axis)' : 'var(--cds-chart-grid)');
+    svg.append('g').selectAll('text').data(xt).join('text').attr('x', (v) => x(v)).attr('y', H - m.b + 14).attr('text-anchor', 'middle').text((v) => v === 0 ? '0' : fmtS(v));
+    svg.append('text').attr('class', 'cg-axis-t').attr('x', x(0)).attr('y', H - 4).attr('text-anchor', 'middle').text('Points vs. all-students median');
+    svg.append('g').selectAll('text').data(groups).join('text').attr('x', m.l - 10).attr('y', (g) => y(g.label) + y.bandwidth() / 2).attr('dy', '0.32em').attr('text-anchor', 'end').text((g) => g.label);
+    const cy = (g) => y(g.label) + y.bandwidth() / 2;
+    svg.append('g').selectAll('line').data(groups).join('line').attr('x1', (g) => x(g.top.vs_overall)).attr('x2', (g) => x(g.low.vs_overall)).attr('y1', cy).attr('y2', cy).attr('stroke', 'var(--cds-chart-grid)').attr('stroke-width', 2);
+    const pts = groups.flatMap((g) => [g.top, g.low]);
+    svg.append('g').selectAll('circle').data(pts).join('circle').attr('cx', (d) => x(d.vs_overall)).attr('cy', (d) => cy(groups.find((g) => g.low === d || g.top === d))).attr('r', 5.5).style('fill', (d) => colorOf(d.position)).attr('stroke', 'var(--color-panel)').attr('stroke-width', 2);
+    svg.append('g').selectAll('text').data(groups).join('text').attr('class', 'cg-val').attr('x', (g) => x(g.low.vs_overall) + 9).attr('y', cy).attr('dy', '0.32em').text((g) => fmtS(g.low.vs_overall));
+    svg.append('g').selectAll('circle').data(pts).join('circle').attr('cx', (d) => x(d.vs_overall)).attr('cy', (d) => cy(groups.find((g) => g.low === d || g.top === d))).attr('r', 12).attr('fill', 'transparent')
+      .on('mousemove', (e, d) => showTip(e, bandTip(d))).on('mouseleave', hideTip);
+  }
+
+  function drawCount(el, rows) {
+    el.replaceChildren();
+    const W = Math.max(280, el.clientWidth), H = 320;
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Band share of students vs distance from all-students median');
+    const y = d3.scaleLinear([Math.min(-40, d3.min(rows, (r) => r.vs_overall) - 5), d3.max(rows, (r) => r.vs_overall) + 8], [0, 0]).nice();
+    const yt = y.ticks(6);
+    const ml = Math.ceil(d3.max(yt, (v) => textW(svg, v === 0 ? '0' : fmtS(v)))) + 8;
+    const m = { t: 10, r: 14, b: 40, l: ml };
+    y.range([H - m.b, m.t]);
+    const x = d3.scaleLinear([0, d3.max(rows, (r) => r.share) * 1.05], [m.l, W - m.r]).nice();
+    const xt = x.ticks(Math.max(3, Math.floor((W - m.l) / 80)));
+    svg.append('g').selectAll('line').data(yt).join('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', (v) => y(v)).attr('y2', (v) => y(v)).attr('stroke', (v) => v === 0 ? 'var(--cds-chart-axis)' : 'var(--cds-chart-grid)');
+    svg.append('g').selectAll('text').data(yt).join('text').attr('x', m.l - 6).attr('y', (v) => y(v)).attr('dy', '0.32em').attr('text-anchor', 'end').text((v) => v === 0 ? '0' : fmtS(v));
+    svg.append('g').selectAll('text').data(xt).join('text').attr('x', (v) => x(v)).attr('y', H - m.b + 14).attr('text-anchor', 'middle').text((v) => d3.format('.0%')(v));
+    svg.append('text').attr('class', 'cg-axis-t').attr('x', (m.l + W - m.r) / 2).attr('y', H - 4).attr('text-anchor', 'middle').text('Share of the grade pair\'s students in the band');
+    const sorted = rows.slice().sort((a, b) => (a.position === 'middle' ? 0 : 1) - (b.position === 'middle' ? 0 : 1));
+    svg.append('g').selectAll('circle').data(sorted).join('circle').attr('cx', (d) => x(d.share)).attr('cy', (d) => y(d.vs_overall)).attr('r', 5)
+      .style('fill', (d) => colorOf(d.position)).attr('stroke', 'var(--color-panel)').attr('stroke-width', 2);
+    svg.append('g').selectAll('circle').data(sorted).join('circle').attr('cx', (d) => x(d.share)).attr('cy', (d) => y(d.vs_overall)).attr('r', 10).attr('fill', 'transparent')
+      .on('mousemove', (e, d) => showTip(e, bandTip(d))).on('mouseleave', hideTip);
+    svg.append('text').attr('x', m.l + 4).attr('y', m.t + 4).attr('dy', '0.7em').text('Points vs. all-students median');
+  }
+
+  const pick = document.getElementById('cg-pick');
+  pick.addEventListener('change', () => dash.setParams({ pair: pick.value || null }));
+
+  function drawTable(rows) {
+    const tb = document.querySelector('#tbl tbody');
+    const choices = [];
+    ['ELA', 'Math'].forEach((s) => ORDER.forEach((g) => { if (rows.some((r) => r.subject === s && r.grades === g)) choices.push(`${s}|${g}`); }));
+    const cur = dash.params().pair ?? '';
+    pick.replaceChildren(new Option('All grade pairs', ''), ...choices.map((c) => new Option(c.replace('|', ' '), c)));
+    pick.value = cur;
+    const shown = cur ? rows.filter((r) => `${r.subject}|${r.grades}` === cur) : rows;
+    tb.replaceChildren(...shown.map((r) => {
+      const tr = document.createElement('tr');
+      tr.dataset.key = [r.subject, r.grades, r.band].map(encodeURIComponent).join(',');
+      const cells = [r.subject, r.grades, r.band, fmtS(r.median), fmtM(r.mean), fmtC(r.count), fmtP(r.share), fmtS(r.vs_overall), fmtM(r.skew)];
+      cells.forEach((c, i) => {
+        const td = document.createElement('td'); td.textContent = c;
+        if (i === 2 && r.position !== 'middle') { const s = document.createElement('span'); s.className = 'cg-pos'; s.style.background = `color-mix(in srgb, ${colorOf(r.position)} 28%, transparent)`; s.textContent = r.position === 'lowest' ? 'lowest' : 'top'; td.appendChild(s); }
+        tr.appendChild(td);
+      });
+      return tr;
+    }));
+  }
+
+  dash.onData(() => {
+    const b = dash.data('bands'), d = dash.data('derived'), s = dash.data('summary');
+    const ok = b.status === 'ok' && d.status === 'ok' && Array.isArray(d.data) && d.data.length;
+    const elB = document.getElementById('chart-bands'), elG = document.getElementById('chart-gap'), elC = document.getElementById('chart-count');
+    document.querySelectorAll('[data-source="summary"]').forEach((n) => {
+      if (s.status === 'ok' && s.data && s.data[0]) { n.classList.remove('dash-skeleton'); n.textContent = String(s.data[0][n.dataset.field]); }
+      else if (s.status === 'error' || b.status === 'error') { n.classList.remove('dash-skeleton'); n.textContent = '—'; }
+      else n.textContent = '—';
+    });
+    if (!ok) {
+      if (b.status === 'error' || d.status === 'error') { fail(elB); fail(elG); fail(elC); }
+      else { elB.replaceChildren(); elG.replaceChildren(); elC.replaceChildren(); }
+      document.querySelector('#tbl tbody').replaceChildren();
+      return;
+    }
+    const totals = {};
+    b.data.filter((r) => String(r.is_total) === 'true').forEach((r) => { totals[r.subject + '|' + r.grades] = num(r.median); });
+    drawBands(elB, d.data, totals);
+    drawGap(elG, d.data);
+    drawCount(elC, d.data);
+    drawTable(d.data);
+  });
+})();
+</script>
+</body></html>
